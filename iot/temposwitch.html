@@ -1,0 +1,53 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<script type="text/javascript">
+window.onload = function () {
+	var chart = new CanvasJS.Chart("chartContainer", {
+		title: {
+			text: "Temperature"
+		},
+		axisX:{
+			valueFormatString: "####",
+          stripLines:[
+			{                
+				startValue:1930,
+				endValue:1950,                
+				color:"#d8d8d8"                
+			},
+            {                
+				startValue:1970,
+				endValue:1990,                
+				color:"#a8d8d8"                
+			}
+			]
+		},
+		axisY:{
+			                 
+		},
+		data: [
+		{
+			type: "splineArea",            
+			color: "rgba(83, 223, 128, .6)",
+			dataPoints: [
+				{ x: 1910, y: 5 }, 
+				{ x: 1920, y: 9 }, 
+				{ x: 1930, y: 17}, 
+				{ x: 1940, y: 32}, 
+				{ x: 1950, y: 22}, 
+				{ x: 1960, y: 14}, 
+				{ x: 1970, y: 25}, 
+				{ x: 1980, y: 18}, 
+				{ x: 1990, y: 20}
+			]
+		}
+		]        
+	});
+	chart.render();
+}
+</script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/canvasjs/1.7.0/jquery.canvasjs.min.js"></script></head>
+<body>
+<div id="chartContainer" style="height: 300px; width: 100%;"></div>
+</body>
+</html>

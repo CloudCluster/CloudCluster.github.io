@@ -9,9 +9,15 @@
 <script type="text/javascript">
 window.onload = function () {
 	// http://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#getObject-property
+	var awsKey = localStorage.getItem('aws-key');
+	var awsSecret = localStorage.getItem('aws-secret');
+	if(awsKey == null || awsSecret == null){
+		window.location="./index.html";
+	}
+	
 	var s3 = new AWS.S3({
-		accessKeyId:'',
-		secretAccessKey:''
+		accessKeyId:awsKey,
+		secretAccessKey:awsSecret
 	});
 	
 	s3.getObject({

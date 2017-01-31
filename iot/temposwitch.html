@@ -38,64 +38,151 @@ window.onload = function () {
 	});
 	
 	s3.getObject({
-		Bucket: 'iot-scheduled-thermostat',
-		Key: 'last24hours.json'
-	}, function(err, data) {
-  		if (err){ 
-			console.log(err, err.stack); 
-		} else {
-			var stat = $.parseJSON(data.Body.toString());
-			var dataPoints = [];
-			var stripLines = [];
-			var scale;
-			var stripLine = {color:"rgba(83, 223, 128, .5)"};
-			var insideStripLine = false;
-			for(i in stat){
-				dataPoints.push({x:new Date(stat[i].time), y:stat[i].temperature});
-				scale = stat[i].scale;
-				if(stat[i].on && !insideStripLine){
-					stripLine.startValue = new Date(stat[i].time);
-					endValue = true;
-				} else if(!stat[i].on && insideStripLine){
-					stripLine.startValue = new Date(stat[i].time);
-					insideStripLine = false;
-					stripLines.push(stripLine);
-					stripLine = {color:"rgba(83, 223, 128, .5)"};
-				}
+			Bucket: 'iot-scheduled-thermostat',
+			Key: 'last24hours.json'
+		}, function(err, data){
+			getData(err, data)
+			s3.getObject({
+					Bucket: 'iot-scheduled-thermostat',
+					Key: 'rules.json'
+				}, getRules);
+		});		
+}
+
+var getRules = function(err, data){
+	if(err){ 
+		console.log(err, err.stack); 
+	} else {
+		var stat = $.parseJSON(data.Body.toString());
+		var dataPoints = [];
+		
+		for(j in tempDataPoints){
+			var temp;
+			for(i in stat.rules){
+				if(isTimeInRule(stat.rules[i], tempDataPoints[j].x.getHours(), tempDataPoints[j].x.getMinutes())){
+					temp = stat.rules[i].temperature;
+				}			
 			}
+			dataPoints.push({x:tempDataPoints[j].x, y:temp});
+		}
 			
-			var chart = new CanvasJS.Chart("chartContainer", {
+		var chart = new CanvasJS.Chart("chartContainer", {
 //				title: {
 //					text: "Temperature"
 //				},
-				axisX:{
-					valueFormatString: "HH:mm",
-					stripLines: stripLines
+			axisX:{
+				valueFormatString: "HH:mm"
+			},
+			axisY:{
+				title: scale,
+				includeZero: true
+			},
+			data: [
+				{
+					type: "spline",
+					name: "Actual Temperature",
+					markerSize: 0,
+					color: "rgba(83, 223, 128, 1)",
+					dataPoints: tempDataPoints
 				},
-				axisY:{
-					title: scale,
-//					logarithmic: true,
-					includeZero: true
-				},
-				data: [
-					{
-						type: "spline",
-						name: "Temperature",
-						markerSize: 0,
-						color: "rgba(83, 223, 128, 1)",
-						dataPoints: dataPoints
-					}
-				],
-				toolTip:{
-					animationEnabled: true,
-   					contentFormatter: function ( e ) {
-               			return e.entries[0].dataPoint.x.toLocaleDateString("en-US", {year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric'}) + ": <strong>" + e.entries[0].dataPoint.y + " " + scale + "</strong>";
-   					}  
- 				},    
-			});
-			chart.render();
+				{
+					type: "stepLine",
+					name: "Min Temperature",
+					markerSize: 0,
+					color: "rgba(223, 83, 128, 1)",
+					dataPoints: dataPoints
+				}
+			],
+			toolTip:{
+				animationEnabled: true,
+				shared: true,
+				contentFormatter: function ( e ) {
+					return e.entries[0].dataPoint.x.toLocaleDateString("en-US", {year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric'}) 
+						+ "<br/>Actual Temperature: <strong>" + e.entries[0].dataPoint.y + " " + scale 
+						+ "</strong><br/>Min Temperature: <strong>" + e.entries[1].dataPoint.y + " " + scale + "</strong>";
+				}  
+			}
+		});
+		chart.render();
+	}
+}
+
+var isTimeInRule = function(rule, hour, minute){
+	if(rule.startHours > rule.finishHours){
+		if((hour < rule.startHours || hour == rule.startHours && minute <= rule.startMinutes) 
+			|| (hour > rule.finishHours || hour == rule.finishHours && minute > rule.finishMinutes)){
+			return true;
 		}
-	});
+	}else{
+		if((hour > rule.startHours || hour == rule.startHours && minute >= rule.startMinutes) 
+			&& (hour < rule.finishHours || hour == rule.finishHours && minute < rule.finishMinutes)){
+			return true;
+		}
+	}
+	return false;
+}
+
+var startTime;
+var endTime;
+var tempDataPoints;
+var scale;
+		
+var getData = function(err, data){
+	if(err){ 
+		console.log(err, err.stack); 
+	} else {
+		var stat = $.parseJSON(data.Body.toString());
+		var dataPoints = [];
+		var stripLines = [];
+		var stripLine = {color:"rgba(83, 223, 128, .5)"};
+		var insideStripLine = false;
+		for(i in stat){
+			dataPoints.push({x:new Date(stat[i].time), y:stat[i].temperature});
+			scale = stat[i].scale;
+			if(stat[i].on && !insideStripLine){
+				stripLine.startValue = new Date(stat[i].time);
+				endValue = true;
+			} else if(insideStripLine && (!stat[i].on || i == stat.length - 1)){
+				stripLine.endValue = new Date(stat[i].time);
+				insideStripLine = false;
+				stripLines.push(stripLine);
+				stripLine = {color:"rgba(83, 223, 128, .5)"};
+			}
+		}
+		tempDataPoints = dataPoints;
+		startTime = new Date(stat[0].time);
+		endTime = new Date(stat[stat.length-1].time);
+		var chart = new CanvasJS.Chart("chartContainer", {
+//				title: {
+//					text: "Temperature"
+//				},
+			axisX:{
+				valueFormatString: "HH:mm",
+				stripLines: stripLines
+			},
+			axisY:{
+				title: scale,
+//					logarithmic: true,
+				includeZero: true
+			},
+			data: [
+				{
+					type: "spline",
+					name: "Temperature",
+					markerSize: 0,
+					color: "rgba(83, 223, 128, 1)",
+					dataPoints: dataPoints
+				}
+			],
+			toolTip:{
+				animationEnabled: true,
+				contentFormatter: function ( e ) {
+					return e.entries[0].dataPoint.x.toLocaleDateString("en-US", {year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric'}) + ": <strong>" + e.entries[0].dataPoint.y + " " + scale + "</strong>";
+				}  
+			},    
+		});
+		chart.render();
+	}
 }
 
 var logout = function(){
@@ -559,7 +646,7 @@ var logout = function(){
 						</div> <!-- /.portlet-header -->
 
 						<div class="portlet-content">
-<div id="chartContainer" style="height: 400px; width: 100%;"></div>
+<div id="chartContainer" style="height: 300px; width: 100%;"></div>
 
 						</div> <!-- /.portlet-content -->
 
@@ -868,8 +955,6 @@ var logout = function(){
 <script src="./js/libs/bootstrap.min.js"></script>
 
 <script src="./js/App.js"></script>
-
-<script src="./js/demos/dashboard.js"></script>
 
 </body>
 </html>

@@ -89,7 +89,7 @@ window.onload = function () {
 				toolTip:{
 					animationEnabled: true,
    					contentFormatter: function ( e ) {
-               			return e.entries[0].dataPoint.x + ": <strong>" + e.entries[0].dataPoint.y + " " + scale + "</strong>";
+               			return e.entries[0].dataPoint.x.toLocaleDateString("en-US", {year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric'}) + ": <strong>" + e.entries[0].dataPoint.y + " " + scale + "</strong>";
    					}  
  				},    
 			});

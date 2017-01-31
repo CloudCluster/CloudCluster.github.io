@@ -8,19 +8,34 @@
 </style>
 <script type="text/javascript">
 window.onload = function () {
-	var chart = new CanvasJS.Chart("chartContainer", {
+	// http://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#getObject-property
+	var s3 = new AWS.S3({
+		accessKeyId:'',
+		secretAccessKey:''
+	});
+	
+	s3.getObject({
+		Bucket: 'STRING_VALUE',
+		Key: 'STRING_VALUE'
+	}, function(err, data) {
+  		if (err){ 
+			console.log(err, err.stack); 
+		} else {
+			console.log(data);      
+			
+			var chart = new CanvasJS.Chart("chartContainer", {
 		title: {
 			text: "Temperature"
 		},
 		axisX:{
-			valueFormatString: "####",
-          stripLines:[
+			valueFormatString: "MMMM DD, YYYY HH:mm",
+		        stripLines:[
 			{                
 				startValue:1930,
 				endValue:1950,                
 				color:"#d8d8d8"                
 			},
-            {                
+	                {                
 				startValue:1970,
 				endValue:1990,                
 				color:"#a8d8d8"                
@@ -49,9 +64,13 @@ window.onload = function () {
 		]        
 	});
 	chart.render();
+		}
+	});
 }
 </script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/canvasjs/1.7.0/jquery.canvasjs.min.js"></script></head>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/canvasjs/1.7.0/jquery.canvasjs.min.js"></script>
+<script type="text/javascript" src="https://sdk.amazonaws.com/js/aws-sdk-2.7.20.min.js"></script>
+</head>
 <body>
 <div id="chartContainer" style="height: 300px; width: 100%;"></div>
 </body>

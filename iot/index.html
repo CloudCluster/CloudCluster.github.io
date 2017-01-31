@@ -38,9 +38,11 @@ var login = function(){
 
 	s3.getBucketLogging({Bucket:'iot-scheduled-thermostat'}, function(err, data) {
   		if(err){ 
-  			console.log(err, err.stack); 
+  			$("#message").text("Invalid AWS Access or Secret Key");
+  			$("#message").addClass("text-danger");
 		}else{
-			console.log(data);
+  			$("#message").text("Success");
+  			$("#message").addClass("text-success");
 			localStorage.setItem('aws-key', awsKey);
 			localStorage.setItem('aws-secret', awsSecret);  
 			window.location="./temposwitch.html";
@@ -65,7 +67,7 @@ var login = function(){
 
 		<h3>Welcome to Cloud Creatures</h3>
 
-		<h5>Please sign in to get access</h5>
+		<h5 id="message">Please sign in to get access</h5>
 
 		<form id="login-form" class="form" onsubmit="return login()">
 

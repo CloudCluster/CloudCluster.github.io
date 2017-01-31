@@ -27,49 +27,52 @@ window.onload = function () {
   		if (err){ 
 			console.log(err, err.stack); 
 		} else {
-			console.log(data);      
+			var stat = $.parseJSON(data.Body.toString());
+			var dataPoints = [];
+			var stripLines = [];
+			var scale;
+			var stripLine = {color:"rgba(83, 223, 128, .5)"};
+			var insideStripLine = false;
+			for(i in stat){
+				dataPoints.push({x:new Date(stat[i].time), y:stat[i].temperature});
+				scale = stat[i].scale;
+				if(stat[i].on && !insideStripLine){
+					stripLine.startValue = new Date(stat[i].time);
+					endValue = true;
+				} else if(!stat[i].on && insideStripLine){
+					stripLine.startValue = new Date(stat[i].time);
+					insideStripLine = false;
+					stripLines.push(stripLine);
+					stripLine = {color:"rgba(83, 223, 128, .5)"};
+				}
+			}
 			
 			var chart = new CanvasJS.Chart("chartContainer", {
-		title: {
-			text: "Temperature"
-		},
-		axisX:{
-			valueFormatString: "MMMM DD, YYYY HH:mm",
-		        stripLines:[
-			{                
-				startValue:1930,
-				endValue:1950,                
-				color:"#d8d8d8"                
-			},
-	                {                
-				startValue:1970,
-				endValue:1990,                
-				color:"#a8d8d8"                
-			}
-			]
-		},
-		axisY:{
-			                 
-		},
-		data: [
-		{
-			type: "splineArea",            
-			color: "rgba(83, 223, 128, .6)",
-			dataPoints: [
-				{ x: 1910, y: 5 }, 
-				{ x: 1920, y: 9 }, 
-				{ x: 1930, y: 17}, 
-				{ x: 1940, y: 32}, 
-				{ x: 1950, y: 22}, 
-				{ x: 1960, y: 14}, 
-				{ x: 1970, y: 25}, 
-				{ x: 1980, y: 18}, 
-				{ x: 1990, y: 20}
-			]
-		}
-		]        
-	});
-	chart.render();
+				title: {
+					text: "Temperature"
+				},
+				axisX:{
+					valueFormatString: "HH:mm",
+					stripLines: stripLines
+				},
+				axisY:{
+					title: scale,
+				},
+				data: [
+					{
+						type: "spline",
+						color: "rgba(83, 223, 128, 1)",
+						dataPoints: dataPoints
+					}
+				],
+				toolTip:{
+					animationEnabled: true,
+   					contentFormatter: function ( e ) {
+               			return e.entries[0].dataPoint.x + ": " + e.entries[0].dataPoint.y + " " + scale;
+   					}  
+ 				},    
+			});
+			chart.render();
 		}
 	});
 }
@@ -79,6 +82,6 @@ window.onload = function () {
 <script type="text/javascript" src="https://sdk.amazonaws.com/js/aws-sdk-2.7.20.min.js"></script>
 </head>
 <body>
-<div id="chartContainer" style="height: 300px; width: 100%;"></div>
+<div id="chartContainer" style="height: 400px; width: 100%;"></div>
 </body>
 </html>

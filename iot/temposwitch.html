@@ -24,15 +24,18 @@
 }
 </style>
 <script type="text/javascript">
-window.onload = function () {
-	// http://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#getObject-property
+
+var s3;
+
+var drawChart = function(){
+// http://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#getObject-property
 	var awsKey = localStorage.getItem('aws-key');
 	var awsSecret = localStorage.getItem('aws-secret');
 	if(awsKey == null || awsSecret == null){
 		window.location="./index.html";
 	}
 	
-	var s3 = new AWS.S3({
+	s3 = new AWS.S3({
 		accessKeyId:awsKey,
 		secretAccessKey:awsSecret
 	});
@@ -48,6 +51,8 @@ window.onload = function () {
 				}, getRules);
 		});		
 }
+
+window.onload = drawChart;
 
 var getRules = function(err, data){
 	if(err){ 
@@ -122,8 +127,6 @@ var isTimeInRule = function(rule, hour, minute){
 	return false;
 }
 
-var startTime;
-var endTime;
 var tempDataPoints;
 var scale;
 		
@@ -150,19 +153,13 @@ var getData = function(err, data){
 			}
 		}
 		tempDataPoints = dataPoints;
-		startTime = new Date(stat[0].time);
-		endTime = new Date(stat[stat.length-1].time);
 		var chart = new CanvasJS.Chart("chartContainer", {
-//				title: {
-//					text: "Temperature"
-//				},
 			axisX:{
 				valueFormatString: "HH:mm",
 				stripLines: stripLines
 			},
 			axisY:{
 				title: scale,
-//					logarithmic: true,
 				includeZero: true
 			},
 			data: [
@@ -183,6 +180,85 @@ var getData = function(err, data){
 		});
 		chart.render();
 	}
+}
+
+var rules;
+
+var editRules = function(){
+	s3.getObject({
+			Bucket: 'iot-scheduled-thermostat',
+			Key: 'rules.json'
+		}, function(err, data){
+			if(err){ 
+				console.log(err, err.stack); 
+			} else {
+				var editRulesContainer = $("#editRulesContainer");
+				rules = $.parseJSON(data.Body.toString());
+				data = rules.rules;
+				editRulesContainer.empty();
+				editRulesContainer.append($('<div class="row"><div class="col-sm-4"><label class="control-label">Start</label></div>'
+					+ '<div class="col-sm-4"><label class="control-label">Finish</label></div>'
+					+ '<div class="col-sm-1"> : </div><div class="col-sm-3"><label class="control-label">Temperature</label></div></div>'));
+
+				for(var i in data){
+					var line = $('<div class="row rule"><div class="col-sm-2"><input type="text" class="form-control startHours" placeholder="Hour" value="'+data[i].startHours+'"></div>'
+					+ '<div class="col-sm-2"><input type="text" class="form-control startMinutes" placeholder="Minutes" value="'+data[i].startMinutes+'"></div>'
+					+ '<div class="col-sm-2"><input type="text" class="form-control finishHours" placeholder="Hour" value="'+data[i].finishHours+'"></div>'
+					+ '<div class="col-sm-2"><input type="text" class="form-control finishMinutes" placeholder="Minutes" value="'+data[i].finishMinutes+'"></div>'
+					+ '<div class="col-sm-1">&nbsp;</div><div class="col-sm-3"><input type="text" class="form-control temperature" placeholder="Celcius" value="'+data[i].temperature+'"></div></div>');
+					editRulesContainer.append(line);
+				}
+				var line = $('<div class="row rule"><div class="col-sm-2"><input type="text" class="form-control startHours" placeholder="Hour"></div>'
+					+ '<div class="col-sm-2"><input type="text" class="form-control startMinutes" placeholder="Minutes"></div>'
+					+ '<div class="col-sm-2"><input type="text" class="form-control finishHours" placeholder="Hour"></div>'
+					+ '<div class="col-sm-2"><input type="text" class="form-control finishMinutes" placeholder="Minutes"></div>'
+					+ '<div class="col-sm-1">&nbsp;</div><div class="col-sm-3"><input type="text" class="form-control temperature" placeholder="Celcius"></div></div>');
+					editRulesContainer.append(line);
+			}
+		});
+}
+
+var saveRules = function(){
+	var newRules = [];
+	$("#editRulesContainer").find(".rule").each(function(index, element) {
+		var el = $(element);
+		var startHours = parseInt(el.find(".startHours").val());
+		var startMinutes = parseInt(el.find(".startMinutes").val());
+		var finishHours = parseInt(el.find(".finishHours").val());
+		var finishMinutes = parseInt(el.find(".finishMinutes").val());
+		var temperature = parseInt(el.find(".temperature").val());
+		if(!isNaN(startHours) && !isNaN(finishHours)){
+			if(isNaN(startMinutes)){
+				startMinutes = 0;
+			}
+			if(isNaN(finishMinutes)){
+				finishMinutes = 0;
+			}
+			if(isNaN(temperature)){
+				temperature = null;
+			}
+			newRules.push({startHours: startHours, 
+				startMinutes: startMinutes, 
+				finishHours: finishHours, 
+				finishMinutes: finishMinutes, 
+				temperature: temperature});
+		}
+	});
+	rules.rules = newRules;
+
+	s3.putObject({
+			Bucket: 'iot-scheduled-thermostat',
+			Key: 'rules.json',
+			Body: JSON.stringify(rules)
+		}, function(err, data) {
+			if (err) {
+				console.log(err, err.stack); 
+			} else {
+			    console.log(data);
+				drawChart();
+			}
+		});
+	$("#basicModal").modal('hide');
 }
 
 var logout = function(){
@@ -642,7 +718,15 @@ var logout = function(){
 								<i class="fa fa-thermometer-half"></i>
 								Room temperature
 							</h3>
-
+							
+							<ul class="portlet-tools pull-right">
+								<li>
+									<a data-toggle="modal" href="#basicModal" onclick="javascript:editRules();" class="btn btn-sm btn-icon">
+										<i class="fa fa-cog"></i>
+									</a>
+								</li>
+							</ul>
+							
 						</div> <!-- /.portlet-header -->
 
 						<div class="portlet-content">
@@ -947,6 +1031,23 @@ var logout = function(){
 		</li>
 	</ul>
 </footer>
+
+<div id="basicModal" class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3 class="modal-title">Temperature rules</h3>
+      </div>
+      <div id="editRulesContainer" class="modal-body">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" onclick="saveRules()">Update rules</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
 
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/canvasjs/1.7.0/canvasjs.js"></script>

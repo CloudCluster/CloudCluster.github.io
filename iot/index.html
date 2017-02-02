@@ -26,6 +26,8 @@ window.onload = function () {
 	var awsSecret = localStorage.getItem('aws-secret');
 	if(awsKey != null && awsSecret != null){
 		window.location="./temposwitch.html";
+	} else {
+		$("#login").show();
 	}
 }
 var login = function(){
@@ -63,7 +65,7 @@ var login = function(){
 		</a>
 	</div>
 
-	<div id="login">
+	<div id="login" style="display:none;">
 
 		<h3>Welcome to Cloud Creatures</h3>
 

@@ -64,7 +64,7 @@ var getRules = function(err, data){
 		for(j in tempDataPoints){
 			var temp;
 			for(i in stat.rules){
-				if(isTimeInRule(stat.rules[i], tempDataPoints[j].x.getHours(), tempDataPoints[j].x.getMinutes())){
+				if(isTimeInRule(stat.rules[i], tempDataPoints[j].x.getHours(), tempDataPoints[j].x.getMinutes(), tempDataPoints[j].x.getDay())){
 					temp = stat.rules[i].temperature;
 				}			
 			}
@@ -112,7 +112,16 @@ var getRules = function(err, data){
 	}
 }
 
-var isTimeInRule = function(rule, hour, minute){
+var week = ["SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
+
+var isTimeInRule = function(rule, hour, minute, dayOfWeek){
+	if(rule.day != null
+			&& rule.day != week[dayOfWeek] 
+			&& (rule.day != "WEEKDAY" || week[dayOfWeek] == "SUNDAY" || week[dayOfWeek] == "SATURDAY")	
+			&& (rule.day != "WEEKEND" || week[dayOfWeek] != "SUNDAY" && week[dayOfWeek] != "SATURDAY")	
+	){
+		return false;
+	}
 	if(rule.startHours > rule.finishHours){
 		if((hour < rule.startHours || hour == rule.startHours && minute <= rule.startMinutes) 
 			|| (hour > rule.finishHours || hour == rule.finishHours && minute > rule.finishMinutes)){
@@ -720,6 +729,12 @@ var logout = function(){
 							</h3>
 							
 							<ul class="portlet-tools pull-right">
+								<li>
+									<a href="javascript:;" onclick="javascript:drawChart();" class="btn btn-sm btn-icon">
+										<i class="fa fa-refresh"></i>
+									</a>
+								</li>
+
 								<li>
 									<a data-toggle="modal" href="#basicModal" onclick="javascript:editRules();" class="btn btn-sm btn-icon">
 										<i class="fa fa-cog"></i>

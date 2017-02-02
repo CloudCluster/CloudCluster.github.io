@@ -207,6 +207,9 @@ var editRules = function(){
 				rules = $.parseJSON(data.Body.toString());
 				data = rules.rules;
 				editRulesContainer.empty();
+				editRulesContainer.append($('<div class="form-group row"><label class="col-form-label col-sm-3">Temperature Shift</label>'
+					+ '<div class="col-sm-4"><input id="shiftField" type="text" class="form-control" value="'+rules.temperatureShift+'"></div></div>'));
+					
 				editRulesContainer.append($('<div class="row"><div class="col-sm-4"><label class="control-label">Start</label></div>'
 					+ '<div class="col-sm-4"><label class="control-label">Finish</label></div>'
 					+ '<div class="col-sm-1"> : </div><div class="col-sm-3"><label class="control-label">Temperature</label></div></div>'));
@@ -256,6 +259,7 @@ var saveRules = function(){
 		}
 	});
 	rules.rules = newRules;
+	rules.temperatureShift = $("#shiftField").val();
 
 	s3.putObject({
 			Bucket: 'iot-scheduled-thermostat',
@@ -291,11 +295,11 @@ var logout = function(){
 				<img src="./img/logos/logo.png" alt="Site Logo" />
 			</a>-->
 		</h1>	
-
+<!--
 		<a href="javascript:;" data-toggle="collapse" data-target=".top-bar-collapse" id="top-bar-toggle" class="navbar-toggle collapsed">
 			<i class="fa fa-cog"></i>
 		</a>
-
+-->
 		<a href="javascript:;" data-toggle="collapse" data-target=".sidebar-collapse" id="sidebar-toggle" class="navbar-toggle collapsed">
 			<i class="fa fa-reorder"></i>
 		</a>
@@ -1057,6 +1061,7 @@ var logout = function(){
         <h3 class="modal-title">Temperature rules</h3>
       </div>
       <div id="editRulesContainer" class="modal-body">
+      		
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>

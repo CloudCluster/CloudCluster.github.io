@@ -147,7 +147,7 @@ var getData = function(err, data){
 		var stat = $.parseJSON(data.Body.toString());
 		var dataPoints = [];
 		stripLines = [];
-		var stripLine = {color:"rgba(223, 83, 128, .1)"};
+		var stripLine = {color:"rgba(223, 83, 128, .15)"};
 		var insideStripLine = false;
 		for(i in stat){
 			dataPoints.push({x:new Date(stat[i].time), y:stat[i].temperature});
@@ -159,7 +159,7 @@ var getData = function(err, data){
 				stripLine.endValue = new Date(stat[i].time);
 				insideStripLine = false;
 				stripLines.push(stripLine);
-				stripLine = {color:"rgba(223, 83, 128, .1)"};
+				stripLine = {color:"rgba(223, 83, 128, .15)"};
 			}
 		}
 		
@@ -212,21 +212,45 @@ var editRules = function(){
 					
 				editRulesContainer.append($('<div class="row"><div class="col-sm-4"><label class="control-label">Start</label></div>'
 					+ '<div class="col-sm-4"><label class="control-label">Finish</label></div>'
-					+ '<div class="col-sm-1"> : </div><div class="col-sm-3"><label class="control-label">Temperature</label></div></div>'));
+					+ '<div class="col-sm-2">Day</div><div class="col-sm-2"><label class="control-label">Temp</label></div></div>'));
 
 				for(var i in data){
 					var line = $('<div class="row rule"><div class="col-sm-2"><input type="text" class="form-control startHours" placeholder="Hour" value="'+data[i].startHours+'"></div>'
 					+ '<div class="col-sm-2"><input type="text" class="form-control startMinutes" placeholder="Minutes" value="'+data[i].startMinutes+'"></div>'
 					+ '<div class="col-sm-2"><input type="text" class="form-control finishHours" placeholder="Hour" value="'+data[i].finishHours+'"></div>'
 					+ '<div class="col-sm-2"><input type="text" class="form-control finishMinutes" placeholder="Minutes" value="'+data[i].finishMinutes+'"></div>'
-					+ '<div class="col-sm-1">&nbsp;</div><div class="col-sm-3"><input type="text" class="form-control temperature" placeholder="Celcius" value="'+data[i].temperature+'"></div></div>');
+					+ '<div class="col-sm-2"><select type="text" class="form-control day">'
+					+ '<option value=""'+(data[i].day==null?' selected':'')+'>Any</option>'
+					+ '<option value="SUNDAY"'+(data[i].day=='SUNDAY'?' selected':'')+'>SU</option>'
+					+ '<option value="MONDAY"'+(data[i].day=='MONDAY'?' selected':'')+'>MO</option>'
+					+ '<option value="TUESDAY"'+(data[i].day=='TUESDAY'?' selected':'')+'>TU</option>'
+					+ '<option value="WEDNESDAY"'+(data[i].day=='WEDNESDAY'?' selected':'')+'>WE</option>'
+					+ '<option value="THURSDAY"'+(data[i].day=='THURSDAY'?' selected':'')+'>TH</option>'
+					+ '<option value="FRIDAY"'+(data[i].day=='FRIDAY'?' selected':'')+'>FR</option>'
+					+ '<option value="SATURDAY"'+(data[i].day=='SATURDAY'?' selected':'')+'>SA</option>'
+					+ '<option value="WEEKDAY"'+(data[i].day=='WEEKDAY'?' selected':'')+'>Weekday</option>'
+					+ '<option value="WEEKEND"'+(data[i].day=='WEEKEND'?' selected':'')+'>Weekend</option>'
+					+ '</select></div>'
+					+ '<div class="col-sm-2"><input type="text" class="form-control temperature" placeholder="Celcius" value="'+data[i].temperature+'"></div></div>');
 					editRulesContainer.append(line);
 				}
-				var line = $('<div class="row rule"><div class="col-sm-2"><input type="text" class="form-control startHours" placeholder="Hour"></div>'
-					+ '<div class="col-sm-2"><input type="text" class="form-control startMinutes" placeholder="Minutes"></div>'
-					+ '<div class="col-sm-2"><input type="text" class="form-control finishHours" placeholder="Hour"></div>'
-					+ '<div class="col-sm-2"><input type="text" class="form-control finishMinutes" placeholder="Minutes"></div>'
-					+ '<div class="col-sm-1">&nbsp;</div><div class="col-sm-3"><input type="text" class="form-control temperature" placeholder="Celcius"></div></div>');
+				var line = $('<div class="row rule"><div class="col-sm-2"><input type="text" class="form-control startHours" placeholder="HH"></div>'
+					+ '<div class="col-sm-2"><input type="text" class="form-control startMinutes" placeholder="MM"></div>'
+					+ '<div class="col-sm-2"><input type="text" class="form-control finishHours" placeholder="HH"></div>'
+					+ '<div class="col-sm-2"><input type="text" class="form-control finishMinutes" placeholder="MM"></div>'
+					+ '<div class="col-sm-2"><select type="text" class="form-control day">'
+					+ '<option value="">Any</option>'
+					+ '<option value="SUNDAY">SU</option>'
+					+ '<option value="MONDAY">MO</option>'
+					+ '<option value="TUESDAY">TU</option>'
+					+ '<option value="WEDNESDAY">WE</option>'
+					+ '<option value="THURSDAY">TH</option>'
+					+ '<option value="FRIDAY">FR</option>'
+					+ '<option value="SATURDAY">SA</option>'
+					+ '<option value="WEEKDAY">Weekday</option>'
+					+ '<option value="WEEKEND">Weekend</option>'
+					+ '</select></div>'
+					+ '<div class="col-sm-2"><input type="text" class="form-control temperature" placeholder="Celcius"></div></div>');
 					editRulesContainer.append(line);
 			}
 		});
@@ -240,6 +264,7 @@ var saveRules = function(){
 		var startMinutes = parseInt(el.find(".startMinutes").val());
 		var finishHours = parseInt(el.find(".finishHours").val());
 		var finishMinutes = parseInt(el.find(".finishMinutes").val());
+		var day = el.find(".day").val()
 		var temperature = parseInt(el.find(".temperature").val());
 		if(!isNaN(startHours) && !isNaN(finishHours)){
 			if(isNaN(startMinutes)){
@@ -255,6 +280,7 @@ var saveRules = function(){
 				startMinutes: startMinutes, 
 				finishHours: finishHours, 
 				finishMinutes: finishMinutes, 
+				day: day,
 				temperature: temperature});
 		}
 	});

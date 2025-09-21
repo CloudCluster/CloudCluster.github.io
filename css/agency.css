@@ -160,12 +160,12 @@ fieldset[disabled] .btn-xl:active,
 .btn-xl.disabled.active,
 .btn-xl[disabled].active,
 fieldset[disabled] .btn-xl.active {
-    border-color: #fed136;
-    background-color: #fed136;
+    border-color: #f7f2c5;
+    background-color: #f7f2c5;
 }
 
 .btn-xl .badge {
-    color: #fed136;
+    color: #f7f2c5;
     background-color: #fff;
 }
 
@@ -175,15 +175,15 @@ fieldset[disabled] .btn-xl.active {
 }
 
 .navbar-default .navbar-brand {
-    font-family: "Indie Flower","Helvetica Neue",Helvetica,Arial,cursive;
-    color: #fed136;
+    font-family: 'Yanone Kaffeesatz', sans-serif;
+    color: #f7f2c5;
 }
 
 .navbar-default .navbar-brand:hover,
 .navbar-default .navbar-brand:focus,
 .navbar-default .navbar-brand:active,
 .navbar-default .navbar-brand.active {
-    color: #fec503;
+    color: #f7f2c5;
 }
 
 .navbar-default .navbar-collapse {
@@ -191,8 +191,8 @@ fieldset[disabled] .btn-xl.active {
 }
 
 .navbar-default .navbar-toggle {
-    border-color: #fed136;
-    background-color: #fed136;
+    border-color: #f7f2c5;
+    background-color: #f7f2c5;
 }
 
 .navbar-default .navbar-toggle .icon-bar {
@@ -201,7 +201,7 @@ fieldset[disabled] .btn-xl.active {
 
 .navbar-default .navbar-toggle:hover,
 .navbar-default .navbar-toggle:focus {
-    background-color: #fed136;
+    background-color: #f7f2c5;
 }
 
 .navbar-default .nav li a {
@@ -215,19 +215,19 @@ fieldset[disabled] .btn-xl.active {
 .navbar-default .nav li a:hover,
 .navbar-default .nav li a:focus {
     outline: 0;
-    color: #fed136;
+    color: #f7f2c5;
 }
 
 .navbar-default .navbar-nav>.active>a {
     border-radius: 0;
     color: #fff;
-    background-color: #fed136;
+    background-color: #f7f2c5;
 }
 
 .navbar-default .navbar-nav>.active>a:hover,
 .navbar-default .navbar-nav>.active>a:focus {
     color: #fff;
-    background-color: #fec503;
+    background-color: #f7f2c5;
 }
 
 @media(min-width:768px) {
@@ -265,7 +265,7 @@ header {
     text-align: center;
     color: #fff;
     background-attachment: scroll;
-    background-image: url(../img/header-bg.jpg);
+    background-image: url(../img/header-bg.png);
     background-position: center center;
     background-repeat: none;
     -webkit-background-size: cover;
@@ -290,10 +290,12 @@ header .intro-text .intro-lead-in {
 header .intro-text .intro-heading {
     margin-bottom: 25px;
     text-transform: uppercase;
-    font-family: Montserrat,"Helvetica Neue",Helvetica,Arial,sans-serif;
+    font-family: "Yanone Kaffeesatz", sans-serif;
     font-size: 40px;
-    font-weight: 700;
+    font-weight: 100;
     line-height: 45px;
+    color: #f7f2c5;
+    text-shadow:1px 1px 3px #f7f2c5;
 }
 
 @media(min-width:768px) {
@@ -313,10 +315,12 @@ header .intro-text .intro-heading {
     header .intro-text .intro-heading {
         margin-bottom: 50px;
         text-transform: uppercase;
-        font-family: Montserrat,"Helvetica Neue",Helvetica,Arial,sans-serif;
+        font-family: "Yanone Kaffeesatz", sans-serif;
         font-size: 70px;
-        font-weight: 700;
+        font-weight: 100;
         line-height: 70px;
+        color: #f7f2c5;
+        text-shadow:1px 1px 3px #f7f2c5;
     }
 }
 
